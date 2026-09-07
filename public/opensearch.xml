@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">
+  <ShortName>Iraq Probashi Help</ShortName>
+  <Description>Search in Iraq Probashi Help</Description>
+  <!-- Replace template host with your production domain when deploying -->
+  <Url type="text/html" template="http://localhost:5173/?q={searchTerms}"/>
+  <InputEncoding>UTF-8</InputEncoding>
+  <OutputEncoding>UTF-8</OutputEncoding>
+</OpenSearchDescription>
