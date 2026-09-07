@@ -1,20 +1,14 @@
 import { useEffect, useState, FormEvent } from 'react';
 import { 
-  ArrowLeft, ArrowRight, Bell, BriefcaseBusiness, Building2, Calendar, 
-  ChevronRight, CircleHelp, ClipboardList, Clock3, FileCheck2, 
-  FileText, Home as HomeIcon, Info, LayoutDashboard, LogOut, MapPin, 
-  Menu, MessageCircle, MoreHorizontal, Pencil, Plus, Search, Settings, 
-  SlidersHorizontal, Sparkles, ThumbsUp, TrendingUp, User, Users, 
-  MessageSquare, UserCheck, UserX, Lock, Eye, EyeOff, AlertCircle 
+  Bell, BriefcaseBusiness, FileCheck2, 
+  Home as HomeIcon, Search, Users, User, ShieldAlert 
 } from 'lucide-react';
 import { supabase } from './lib/supabase';
 import './App.css';
 
-type Page = 'home' | 'social' | 'jobs' | 'notices' | 'passport' | 'search';
+type Page = 'home' | 'social' | 'jobs' | 'notices' | 'passport' | 'search' | 'profile' | 'track' | 'chat';
+
 type Post = { id: string; author_name: string; author_role: string; content: string; time: string; likes_count: number; comments_count: number };
-type Application = { id: string; tracking_code: string; title: string; status: string; date: string };
-type ChatMessage = { id: string; sender_name: string; sender_role: string; message: string; time: string };
-type UserProfile = { id: string; full_name: string; email: string; user_role: string };
 type Job = { company: string; title: string; location: string; salary: string; description: string };
 
 const jobs: Job[] = [
@@ -43,7 +37,7 @@ const navItems = [
   { page: 'social' as Page, label: 'সোশ্যাল', icon: Users },
   { page: 'jobs' as Page, label: 'চাকরি', icon: BriefcaseBusiness },
   { page: 'notices' as Page, label: 'নোটিশ', icon: Bell },
-  { page: 'profile' as Page, label: 'প্রোফাইল', icon: UserRound = User }
+  { page: 'profile' as Page, label: 'প্রোফাইল', icon: User }
 ];
 
 const serviceItems = [
@@ -53,10 +47,11 @@ const serviceItems = [
   { page: 'search' as Page, label: 'অনলাইন সার্চ', sub: 'Track Application', icon: Search, color: 'text-purple-500' }
 ];
 
+// নিখুঁত সার্চ কম্পোনেন্ট
 function SearchResults({ query }: { query: string }) {
   const lowerQuery = query.toLowerCase();
   const matchedJobs = jobs.filter(j => j.title.toLowerCase().includes(lowerQuery) || j.company.toLowerCase().includes(lowerQuery) || j.location.toLowerCase().includes(lowerQuery));
-  const matchedNotices = notices.filter(n => n.title.toLowerCase().includes(n.title.toLowerCase()) || n.tag.toLowerCase().includes(lowerQuery));
+  const matchedNotices = notices.filter(n => n.title.toLowerCase().includes(lowerQuery) || n.tag.toLowerCase().includes(lowerQuery));
   const matchedPosts = initialPosts.filter(p => p.content.toLowerCase().includes(lowerQuery) || p.author_name.toLowerCase().includes(lowerQuery));
 
   return (
@@ -94,6 +89,15 @@ function SearchResults({ query }: { query: string }) {
       </section>
     </div>
   );
+}
+
+// মিসিং পেজগুলোর জন্য বেসিক কম্পোনেন্ট ডিফinition
+function PassportPage() {
+  return <div style={{ padding: '16px' }}><h2>পাসপোর্ট স্ট্যটাস ও ট্র্যাকিং</h2><p>আপনার পাসপোর্ট নম্বর দিয়ে স্ট্যাটাস চেক করুন।</p></div>;
+}
+
+function ProfilePage() {
+  return <div style={{ padding: '16px' }}><h2>ইউজার প্রোফাইল</h2><p>আপনার অ্যাকাউন্ট সংক্রান্ত তথ্য এখানে দেখা যাবে।</p></div>;
 }
 
 export default function App() {
@@ -189,6 +193,8 @@ export default function App() {
           </div>
         )}
 
+        {page === 'passport' && <PassportPage />}
+        {page === 'profile' && <ProfilePage />}
         {page === 'search' && <SearchResults query={searchQuery} />}
       </main>
 
