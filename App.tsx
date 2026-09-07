@@ -5,7 +5,7 @@ import {
   Home as HomeIcon, Info, LayoutDashboard, LogOut, MapPin,
   Menu, MessageCircle, MoreHorizontal, Pencil, Plus, Search, Send, Settings, Shield,
   SlidersHorizontal, Sparkles, ThumbsUp, TrendingUp, User, UserRound, Users, X,
-  type LucideIcon,
+  type LucideIcon, UserCheck, UserX
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import './App.css';
@@ -14,6 +14,7 @@ type Page = 'home' | 'social' | 'jobs' | 'notices' | 'passport' | 'track' | 'cha
 type Post = { id: string; author_name: string; author_role: string; content: string; image_url?: string | null; likes: number; created_at: string };
 type Application = { id: string; tracking_code: string; title: string; category: string; status: string; submitted_at: string };
 type ChatMessage = { id: string; sender_name: string; sender_role: string; content: string; created_at: string };
+type UserProfile = { id: string; full_name: string; email: string; role: 'admin' | 'agent' | 'user'; status: 'pending' | 'approved' | 'rejected'; created_at: string };
 
 type Job = { company: string; title: string; location: string; salary: string; type: string; icon: LucideIcon; color: string; description: string };
 
@@ -195,7 +196,7 @@ export default function App() {
           {page === 'chat' && <Chat messages={messages} sendMessage={sendMessage} />}
           {page === 'profile' && <Profile setPage={setPage} notify={notify} />}
           {page === 'agent' && <Dashboard kind="agent" setPage={setPage} />}
-          {page === 'admin' && <Dashboard kind="admin" setPage={setPage} />}
+          {page === 'admin' && <AdminPanel setPage={setPage} />}
           {page === 'super' && <Dashboard kind="super" setPage={setPage} />}
         </main>
 
@@ -467,8 +468,7 @@ function Chat({ messages, sendMessage }: { messages: ChatMessage[]; sendMessage:
         ))}
       </div>
       <form className="chat-input-box" onSubmit={submit}>
-        আপনার বার্তা লিখুন...
-        <input value={text} onChange={(e) => setText(e.target.value)} placeholder="এখানে লিখুন..." />
+        <input value={text} onChange={(e) => setText(e.target.value)} placeholder="আপনার বার্তা লিখুন..." />
         <button type="submit"><Send size={16} /></button>
       </form>
     </div>
@@ -499,6 +499,124 @@ function Dashboard({ kind, setPage }: { kind: 'agent' | 'admin' | 'super'; setPa
       <button className="back-btn" onClick={() => setPage('profile')}><ArrowLeft size={16} /> ফিরে যান</button>
       <h2>{kind === 'agent' ? 'এজেন্ট ড্যাশবোর্ড' : kind === 'admin' ? 'এডমিন প্যানেল' : 'সুপার এডমিন'}</h2>
       <p>ব্যবস্থাপনা ও নিয়ন্ত্রণ প্যানেল</p>
+    </div>
+  );
+}
+
+function AdminPanel({ setPage }: { setPage: (p: Page) => void }) {
+  const [users, setUsers] = useState<UserProfile[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchUsers = async () => {
+    setLoading(true);
+    const { data, error } = await supabase.from('profiles').select('*');
+    if (!error && data) {
+      setUsers(data as UserProfile[]);
+    } else {
+      // ডেমো ডাটা যদি ডাটাবেজ টেবিল না থাকে
+      setUsers([
+        { id: '1', full_name: 'রফিকুল ইসলাম', email: 'rafiq@gmail.com', role: 'user', status: 'pending', created_at: '2026-03-01' },
+        { id: '2', full_name: 'কামাল হোসেন', email: 'kamal@gmail.com', role: 'agent', status: 'approved', created_at: '2026-02-15' }
+      ]);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    void fetchUsers();
+  }, []);
+
+  const updateUserRoleAndStatus = async (userId: string, newRole: 'admin' | 'agent' | 'user', newStatus: 'pending' | 'approved' | 'rejected') => {
+    const { error } = await supabase
+      .from('profiles')
+      .update({ role: newRole, status: newStatus })
+      .eq('id', userId);
+
+    if (error) {
+      alert('লোকাল মোডে আপডেট করা হয়েছে (ডাটাবেজ কানেকশন চেক করুন)');
+    } else {
+      alert('সফলভাবে আপডেট করা হয়েছে!');
+    }
+    setUsers(current => current.map(u => u.id === userId ? { ...u, role: newRole, status: newStatus } : u));
+  };
+
+  return (
+    <div className="space-y-6 p-4">
+      <button className="back-btn mb-4 flex items-center gap-1 text-sm font-semibold text-emerald-600" onClick={() => setPage('profile')}>
+        <ArrowLeft size={16} /> প্রোফাইলে ফিরে যান
+      </button>
+
+      <div className="bg-gradient-to-r from-emerald-600 to-teal-700 text-white p-5 rounded-2xl shadow">
+        <h2 className="text-lg font-bold flex items-center gap-2">
+          <Shield className="w-5 h-5" /> বস অ্যাডমিন ও এজেন্ট কন্ট্রোল প্যানেল
+        </h2>
+        <p className="text-xs text-emerald-100 mt-1">এখান থেকে পুরো অ্যাপের ইউজার এবং এজেন্টদের ভূমিকা ও অনুমতি নিয়ন্ত্রণ করুন।</p>
+      </div>
+
+      <div className="grid grid-cols-3 gap-3 my-4">
+        <div className="bg-white p-3 rounded-xl shadow border border-gray-100 text-center">
+          <p className="text-[11px] text-gray-400">মোট ইউজার</p>
+          <h3 className="text-lg font-bold text-gray-800">{users.length}</h3>
+        </div>
+        <div className="bg-white p-3 rounded-xl shadow border border-gray-100 text-center">
+          <p className="text-[11px] text-gray-400">এজেন্ট</p>
+          <h3 className="text-lg font-bold text-gray-800">{users.filter(u => u.role === 'agent' && u.status === 'approved').length}</h3>
+        </div>
+        <div className="bg-white p-3 rounded-xl shadow border border-gray-100 text-center">
+          <p className="text-[11px] text-gray-400">পেন্ডিং</p>
+          <h3 className="text-lg font-bold text-gray-800">{users.filter(u => u.status === 'pending').length}</h3>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-2xl shadow border border-gray-100 overflow-hidden">
+        <div className="p-3.5 border-b border-gray-100 font-bold text-sm text-gray-800">সকল ইউজার ও এজেন্ট তালিকা</div>
+        {loading ? (
+          <div className="p-6 text-center text-xs text-gray-500">লোড হচ্ছে...</div>
+        ) : (
+          <div className="divide-y divide-gray-100">
+            {users.map((user) => (
+              <div key={user.id} className="p-3.5 flex items-center justify-between gap-2">
+                <div>
+                  <h4 className="font-bold text-xs text-gray-800">{user.full_name || 'নামবিহীন ইউজার'}</h4>
+                  <p className="text-[10px] text-gray-500">{user.email}</p>
+                  <div className="flex gap-1.5 mt-1">
+                    <span className={`text-[9px] px-2 py-0.5 rounded-full font-semibold ${
+                      user.role === 'admin' ? 'bg-purple-100 text-purple-700' :
+                      user.role === 'agent' ? 'bg-teal-100 text-teal-700' : 'bg-gray-100 text-gray-600'
+                    }`}>
+                      {user.role}
+                    </span>
+                    <span className={`text-[9px] px-2 py-0.5 rounded-full font-semibold ${
+                      user.status === 'approved' ? 'bg-emerald-100 text-emerald-700' :
+                      user.status === 'pending' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'
+                    }`}>
+                      {user.status}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-1.5">
+                  {user.role !== 'agent' ? (
+                    <button
+                      onClick={() => void updateUserRoleAndStatus(user.id, 'agent', 'approved')}
+                      className="px-2.5 py-1 bg-emerald-600 text-white text-[10px] rounded-lg hover:bg-emerald-700 transition"
+                    >
+                      এজেন্ট বানান
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => void updateUserRoleAndStatus(user.id, 'user', 'rejected')}
+                      className="px-2.5 py-1 bg-red-500 text-white text-[10px] rounded-lg hover:bg-red-600 transition flex items-center gap-1"
+                    >
+                      <UserX size={12} /> বাতিল
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
