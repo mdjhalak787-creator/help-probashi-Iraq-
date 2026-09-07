@@ -1,9 +1,9 @@
-import { useEffect, useState, FormEvent } from 'react';
+import { useEffect, useState } from 'react';
 import { 
   Bell, BriefcaseBusiness, FileCheck2, 
-  Home as HomeIcon, Search, Users, User, ShieldAlert 
+  Home as HomeIcon, Search, Users, User, 
+  ArrowLeft, MapPin, Phone, Mail, ChevronRight, Settings, LogOut, FileText, Send, Smile
 } from 'lucide-react';
-import { supabase } from './lib/supabase';
 import './App.css';
 
 type Page = 'home' | 'social' | 'jobs' | 'notices' | 'passport' | 'search' | 'profile' | 'track' | 'chat';
@@ -12,155 +12,205 @@ type Post = { id: string; author_name: string; author_role: string; content: str
 type Job = { company: string; title: string; location: string; salary: string; description: string };
 
 const jobs: Job[] = [
-  { company: 'Al-Nahrain Transport Co.', title: 'সেফটি ইঞ্জিনিয়ার', location: 'বাগদাদ, ইরাক', salary: '$800 - $1000', description: 'অভিজ্ঞ সেফটি ইঞ্জিনিয়ার প্রয়োজন। থাকা ও খাওয়া ফ্রি।' },
-  { company: 'Al-Basra Engineering', title: 'সিভিল সুপারভাইজার', location: 'বসরা, ইরাক', salary: '$900 - $1200', description: 'বিল্ডিং কনস্ট্রাকশনের কাজে অভিজ্ঞ সুপারভাইজার।' },
-  { company: 'Iraq Bangla Trading', title: 'সেলস এক্সিকিউটিভ', location: 'এরবিল, ইরাক', salary: '$600 - $750', description: 'বাংলা ও আরবি ভাষায় দক্ষ সেলস কর্মী প্রয়োজন।' },
-  { company: 'Al-Safa Construction', title: 'সাইট সুপারভাইজার', location: 'নাজাফ, ইরাক', salary: '$700 - $900', description: 'নির্মাণ প্রকল্পে কাজের তদারকি করার জন্য লোক প্রয়োজন।' },
-  { company: 'Baghdad IT Solutions', title: 'ওয়ার্কার / লেবার', location: 'বাগদাদ, ইরাক', salary: '$500 - $600', description: 'সাধারণ লেবার ও প্যাকিংয়ের কাজ।' }
+  { company: 'Al-Nahrain Transport Co.', title: 'ড্রাইভার (Driver)', location: 'বাগদাদ, ইরাক', salary: 'IQD 750,000 - 900,000', description: 'হেভি ভেহিকেলে অভিজ্ঞ ড্রাইভার প্রয়োজন।' },
+  { company: 'Al-Basra Engineering', title: 'সেলস এক্সিকিউটিভ', location: 'বসরা, ইরাক', salary: 'IQD 800,000 - 1,000,000', description: 'ইন্ডাস্ট্রিয়াল সেলস ও মার্কেটিংয়ে অভিজ্ঞ।' },
+  { company: 'Iraq Bangla Trading', title: 'সেলস এক্সিকিউটিভ', location: 'এরবিল, ইরাক', salary: 'IQD 700,000 - 850,000', description: 'জেনারেল ট্রেডিংয়ের জন্য কর্মী আবশ্যক।' },
+  { company: 'Al-Safa Construction', title: 'সহায়ক (Helper)', location: 'নাজাফ, ইরাক', salary: 'IQD 550,000 - 650,000', description: 'নির্মাণ প্রকল্পে সাধারণ কাজ।' }
 ];
 
 const notices = [
-  { title: 'পাসপোর্ট নবায়ন সংক্রান্ত গুরুত্বপূর্ণ নোটিশ', date: '০৫ মে, ২০২৬', tag: 'জরুরি' },
-  { title: 'ইরাকে নতুন ভিসা নীতিমালা', date: '০৩ মে, ২০২৬', tag: 'নিউজ' },
-  { title: 'দূরভাষী সহায়তা চালুর সময়সূচি', date: '৩০ এপ্রিল, ২০২৬', tag: 'ঘোষণা' },
-  { title: 'কন্ট্রাক্ট বিষয়ে অনিয়ম - ২০২৬', date: '২৭ এপ্রিল, ২০২৬', tag: 'সতর্কতা' },
-  { title: 'কম্পানির লাইসেন্স আপডেট নির্দেশনা', date: '২২ এপ্রিল, ২০২৬', tag: 'অফিসিয়াল' }
+  { title: 'পাসপোর্ট নবায়ন সংক্রান্ত গুরুত্বপূর্ণ নোটিশ', date: '০৫ মে, ২০২৬', tag: 'গুরুত্বপূর্ণ' },
+  { title: 'ইরাকে নতুন ভিসা নীতিমালা', date: '৩০ এপ্রিল, ২০২৬', tag: 'জরুরি' },
+  { title: 'শ্রম মন্ত্রণালয়ের নির্দেশনা', date: '২৮ এপ্রিল, ২০২৬', tag: 'সরকারি' },
+  { title: 'ছুটির দিনের তালিকা - ২০২৬', date: '২৫ এপ্রিল, ২০২৬', tag: 'সাধারণ' }
 ];
 
 const initialPosts: Post[] = [
-  { id: 'seed-1', author_name: 'রতন আলম', author_role: 'সদস্য', content: 'ইরাকের কুর্দিস্তান অঞ্চলে আবহাওয়া বেশ ভালো। কাজের পরিবেশও চমৎকার। প্রবাসীদের জন্য শুভকামনা।', time: '২ ঘণ্টা আগে', likes_count: 14, comments_count: 3 },
-  { id: 'seed-2', author_name: 'কামরুল হাসান', author_role: 'মডারেটর', content: 'যেকোনো আইনি সহায়তার জন্য সরাসরি হেল্পলাইনে যোগাযোগ করুন। প্রবাসী কল্যাণ সবসময় আপনাদের পাশে আছে।', time: '৫ ঘণ্টা আগে', likes_count: 28, comments_count: 7 }
+  { id: 'seed-1', author_name: 'Rashid Alom', author_role: 'সদস্য', content: 'আজ ইরাকে বৃষ্টি, আলহামদুলিল্লাহ 🌧️ সবাই কেমন আছেন?', time: '22m', likes_count: 128, comments_count: 14 },
+  { id: 'seed-2', author_name: 'Sujon Ahmed', author_role: 'মডারেটর', content: 'নতুন কাজ শুরু করলাম, দোয়া করবেন 🙏', time: '1h', likes_count: 45, comments_count: 5 }
 ];
 
 const navItems = [
   { page: 'home' as Page, label: 'হোম', icon: HomeIcon },
   { page: 'social' as Page, label: 'সোশ্যাল', icon: Users },
-  { page: 'jobs' as Page, label: 'চাকরি', icon: BriefcaseBusiness },
-  { page: 'notices' as Page, label: 'নোটিশ', icon: Bell },
+  { page: 'jobs' as Page, label: 'সেবা', icon: BriefcaseBusiness, isCenter: true },
+  { page: 'chat' as Page, label: 'চ্যাট', icon: Search }, // চ্যাট বা সাপোর্ট
   { page: 'profile' as Page, label: 'প্রোফাইল', icon: User }
 ];
 
-const serviceItems = [
-  { page: 'notices' as Page, label: 'জরুরি নোটিশ', sub: 'লেটেস্ট আপডেট', icon: Bell, color: 'text-amber-500' },
-  { page: 'jobs' as Page, label: 'চাকরি ও নিয়োগ', sub: 'ইরাক জবস', icon: BriefcaseBusiness, color: 'text-blue-500' },
-  { page: 'passport' as Page, label: 'পাসপোর্ট স্ট্যাটাস', sub: 'ট্র্যাকিং সেবা', icon: FileCheck2, color: 'text-emerald-500' },
-  { page: 'search' as Page, label: 'অনলাইন সার্চ', sub: 'Track Application', icon: Search, color: 'text-purple-500' }
-];
-
-// নিখুঁত সার্চ কম্পোনেন্ট
-function SearchResults({ query }: { query: string }) {
-  const lowerQuery = query.toLowerCase();
-  const matchedJobs = jobs.filter(j => j.title.toLowerCase().includes(lowerQuery) || j.company.toLowerCase().includes(lowerQuery) || j.location.toLowerCase().includes(lowerQuery));
-  const matchedNotices = notices.filter(n => n.title.toLowerCase().includes(lowerQuery) || n.tag.toLowerCase().includes(lowerQuery));
-  const matchedPosts = initialPosts.filter(p => p.content.toLowerCase().includes(lowerQuery) || p.author_name.toLowerCase().includes(lowerQuery));
-
+// ১. স্প্ল্যাশ স্ক্রিন কম্পোনেন্ট
+function SplashScreen({ onFinish }: { onFinish: () => void }) {
   return (
-    <div style={{ padding: '16px', maxWidth: '800px', margin: '0 auto' }}>
-      <h2>সার্চ ফলাফল: "{query}"</h2>
-      
-      <section style={{ marginTop: '20px' }}>
-        <h3>চাকরি ({matchedJobs.length})</h3>
-        {matchedJobs.length === 0 ? <p style={{ color: '#666' }}>কোনো চাকরি পাওয়া যায়নি।</p> : matchedJobs.map((job, idx) => (
-          <div key={idx} style={{ background: '#fff', padding: '12px', margin: '8px 0', borderRadius: '8px', border: '1px solid #ddd' }}>
-            <strong>{job.title}</strong> - {job.company} ({job.location})<br />
-            <small>{job.description} | বেতন: {job.salary}</small>
-          </div>
-        ))}
-      </section>
+    <div onClick={onFinish} className="min-h-screen bg-[#0b1c3c] flex flex-col justify-between items-center text-white p-6 relative cursor-pointer">
+      <div className="absolute top-4 left-4 bg-white/10 px-3 py-1 rounded-full text-xs font-semibold backdrop-blur-md">
+        ট্যাপ করে ভেতরে প্রবেশ করুন
+      </div>
 
-      <section style={{ marginTop: '20px' }}>
-        <h3>নোটিশ ({matchedNotices.length})</h3>
-        {matchedNotices.length === 0 ? <p style={{ color: '#666' }}>কোনো নোটিশ পাওয়া যায়নি।</p> : matchedNotices.map((n, idx) => (
-          <div key={idx} style={{ background: '#fff', padding: '12px', margin: '8px 0', borderRadius: '8px', border: '1px solid #ddd' }}>
-            <strong>{n.title}</strong><br /><small>তারিখ: {n.date} | ট্যাগ: {n.tag}</small>
-          </div>
-        ))}
-      </section>
+      <div className="flex flex-col items-center justify-center flex-1 text-center mt-12">
+        <div className="w-28 h-28 rounded-full border-4 border-white/20 flex items-center justify-center mb-6 shadow-2xl bg-white/5 backdrop-blur-md">
+          <Users className="w-16 h-16 text-emerald-400" />
+        </div>
+        <h1 className="text-3xl font-bold mb-2">ইরাক প্রবাসী হেল্প</h1>
+        <h2 className="text-xl font-medium text-slate-300 mb-2">Iraq Probashi Help</h2>
+        <p className="text-lg text-slate-300 mb-6">مساعدة للمغتربين في العراق</p>
+        <div className="w-16 h-1 bg-emerald-500 rounded-full mb-6"></div>
+        <p className="text-base font-medium text-slate-200">প্রবাসীর পাশে, সব সময়</p>
+        <p className="text-sm text-slate-400">Always beside the expatriates</p>
+      </div>
 
-      <section style={{ marginTop: '20px' }}>
-        <h3>পোস্ট ({matchedPosts.length})</h3>
-        {matchedPosts.length === 0 ? <p style={{ color: '#666' }}>কোনো পোস্ট পাওয়া যায়নি।</p> : matchedPosts.map((p) => (
-          <div key={p.id} style={{ background: '#fff', padding: '12px', margin: '8px 0', borderRadius: '8px', border: '1px solid #ddd' }}>
-            <strong>{p.author_name}</strong> ({p.author_role})<br />
-            <p>{p.content}</p>
-            <small>{p.time}</small>
+      <div className="w-full flex justify-between items-end pb-4 px-2">
+        <div className="bg-white/10 p-2 rounded-xl border border-white/10">
+          <div className="w-8 h-5 rounded bg-[#006a4e] flex items-center justify-center">
+            <div className="w-3 h-3 rounded-full bg-[#f42a41]"></div>
           </div>
-        ))}
-      </section>
+        </div>
+        <div className="bg-white/10 p-2 rounded-xl border border-white/10">
+          <div className="w-8 h-5 rounded flex flex-col overflow-hidden">
+            <div className="h-1/3 bg-red-600"></div>
+            <div className="h-1/3 bg-white text-[4px] text-center font-bold text-green-700">الله</div>
+            <div className="h-1/3 bg-black"></div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
 
-// মিসিং পেজগুলোর জন্য বেসিক কম্পোনেন্ট ডিফinition
-function PassportPage() {
-  return <div style={{ padding: '16px' }}><h2>পাসপোর্ট স্ট্যটাস ও ট্র্যাকিং</h2><p>আপনার পাসপোর্ট নম্বর দিয়ে স্ট্যাটাস চেক করুন।</p></div>;
-}
-
+// ২. প্রফাইল পেজ কম্পোনেন্ট
 function ProfilePage() {
-  return <div style={{ padding: '16px' }}><h2>ইউজার প্রোফাইল</h2><p>আপনার অ্যাকাউন্ট সংক্রান্ত তথ্য এখানে দেখা যাবে।</p></div>;
+  return (
+    <div className="min-h-screen bg-slate-900 pb-24 text-white">
+      <div className="bg-slate-800 px-4 py-4 flex items-center justify-between border-b border-slate-700">
+        <button className="p-1 hover:bg-slate-700 rounded-full"><ArrowLeft className="w-6 h-6 text-slate-300" /></button>
+        <h1 className="text-lg font-semibold">আমার প্রোফাইল</h1>
+        <button className="p-1 hover:bg-slate-700 rounded-full relative"><Bell className="w-6 h-6 text-slate-300" /><span className="absolute top-1 right-1 w-2 h-2 bg-emerald-500 rounded-full"></span></button>
+      </div>
+
+      <div className="p-4">
+        <div className="bg-slate-800 rounded-2xl p-5 shadow-lg border border-slate-700/50 mb-4 flex items-start gap-4">
+          <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80" alt="Profile" className="w-20 h-20 rounded-full object-cover border-2 border-emerald-500" />
+          <div>
+            <h2 className="text-xl font-bold text-white mb-1">মুসফাক রাশেদ</h2>
+            <p className="text-sm text-slate-300 flex items-center gap-1.5 mb-1"><MapPin className="w-4 h-4 text-emerald-400" /> Baghdad, Iraq</p>
+            <p className="text-sm text-slate-300 flex items-center gap-1.5 mb-1"><Phone className="w-4 h-4 text-emerald-400" /> +964 770 123 4567</p>
+            <p className="text-xs text-slate-400 flex items-center gap-1.5"><Mail className="w-3.5 h-3.5 text-emerald-400" /> rashed.bd1995@gmail.com</p>
+          </div>
+        </div>
+
+        <div className="bg-slate-800 rounded-2xl overflow-hidden border border-slate-700/50 divide-y divide-slate-700/50">
+          <button className="w-full px-5 py-4 flex items-center justify-between hover:bg-slate-700/50"><div className="flex items-center gap-3"><User className="w-5 h-5 text-emerald-400" /><span className="font-medium text-slate-200">ব্যক্তিগত তথ্য</span></div><ChevronRight className="w-5 h-5 text-slate-400" /></button>
+          <button className="w-full px-5 py-4 flex items-center justify-between hover:bg-slate-700/50"><div className="flex items-center gap-3"><FileText className="w-5 h-5 text-emerald-400" /><span className="font-medium text-slate-200">আমার আবেদন সমূহ</span></div><ChevronRight className="w-5 h-5 text-slate-400" /></button>
+          <button className="w-full px-5 py-4 flex items-center justify-between hover:bg-slate-700/50"><div className="flex items-center gap-3"><Bell className="w-5 h-5 text-emerald-400" /><span className="font-medium text-slate-200">নোটিফিকেশন সেটিংস</span></div><ChevronRight className="w-5 h-5 text-slate-400" /></button>
+          <button className="w-full px-5 py-4 flex items-center justify-between hover:bg-slate-700/50"><div className="flex items-center gap-3"><Globe className="w-5 h-5 text-emerald-400" /><span className="font-medium text-slate-200">ভাষা / Language</span></div><span className="text-sm text-emerald-400 font-medium">বাংলা</span></button>
+          <button className="w-full px-5 py-4 flex items-center justify-between hover:bg-slate-700/50"><div className="flex items-center gap-3"><Settings className="w-5 h-5 text-emerald-400" /><span className="font-medium text-slate-200">সেটিংস</span></div><ChevronRight className="w-5 h-5 text-slate-400" /></button>
+          <button className="w-full px-5 py-4 flex items-center justify-between hover:bg-red-500/10 text-red-400"><div className="flex items-center gap-3"><LogOut className="w-5 h-5" /><span className="font-medium">লগ আউট</span></div></button>
+        </div>
+      </div>
+    </div>
+  );
 }
 
+// ৩. চ্যাট সাপোর্ট কম্পোনেন্ট
+function ChatPage() {
+  return (
+    <div className="min-h-screen bg-slate-900 pb-24 text-white flex flex-col">
+      <div className="bg-slate-800 px-4 py-4 flex items-center gap-3 border-b border-slate-700">
+        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" alt="Support" className="w-10 h-10 rounded-full border border-emerald-500" />
+        <div>
+          <h3 className="font-bold text-sm">সাপোর্ট টিম</h3>
+          <span className="text-xs text-emerald-400 flex items-center gap-1">● অনলাইন</span>
+        </div>
+      </div>
+      <div className="flex-1 p-4 space-y-4 overflow-y-auto">
+        <div className="bg-slate-800 p-3 rounded-xl max-w-[80%] text-sm">আসসালামু আলাইকুম, কীভাবে সাহায্য করতে পারি?</div>
+        <div className="bg-emerald-700 p-3 rounded-xl max-w-[80%] ml-auto text-sm">আমি পাসপোর্ট নবায়ন করতে চাই, কি কি লাগবে?</div>
+        <div className="bg-slate-800 p-3 rounded-xl max-w-[80%] text-sm">জী, আপনার পাসপোর্ট, আইডি কার্ড এবং ছবি লাগবে। বিস্তারিত নিচে দেখুন।</div>
+      </div>
+      <div className="p-3 bg-slate-800 flex items-center gap-2 fixed bottom-16 left-0 right-0 border-t border-slate-700">
+        <Smile className="w-6 h-6 text-slate-400" />
+        <input type="text" placeholder="মেসেজ লিখুন..." className="flex-1 bg-slate-900 border border-slate-700 rounded-full px-4 py-2 text-sm text-white focus:outline-none" />
+        <button className="w-10 h-10 bg-emerald-600 rounded-full flex items-center justify-center text-white"><Send className="w-4 h-4" /></button>
+      </div>
+    </div>
+  );
+}
+
+// মূল অ্যাপ কম্পোনেন্ট
 export default function App() {
+  const [showSplash, setShowSplash] = useState(true);
   const [page, setPage] = useState<Page>('home');
   const [searchQuery, setSearchQuery] = useState('');
 
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const q = params.get('q');
-    if (q) {
-      setSearchQuery(q);
-      setPage('search');
-    }
-  }, []);
-
   return (
-    <div className="app-container" style={{ minHeight: '100vh', background: '#f5f7fa', paddingBottom: '70px' }}>
+    showSplash ? <SplashScreen onFinish={() => setShowSplash(false)} /> :
+    <div className="app-container min-h-screen bg-slate-900 text-white pb-20">
       {/* Header */}
-      <header style={{ background: '#0d9488', color: '#fff', padding: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h1 style={{ fontSize: '18px', margin: 0 }}>প্রবাসী হেল্প কেয়ার ইরাক</h1>
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <input 
-            type="text" 
-            placeholder="সার্চ করুন..." 
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && searchQuery) {
-                window.history.pushState({}, '', `?q=${encodeURIComponent(searchQuery)}`);
-                setPage('search');
-              }
-            }}
-            style={{ padding: '6px 12px', borderRadius: '4px', border: 'none' }}
-          />
-        </div>
+      <header className="bg-slate-800 text-white px-4 py-3 flex justify-between items-center border-b border-slate-700">
+        <h1 className="text-base font-bold">প্রবাসী হেল্প কেয়ার ইরাক</h1>
+        <input 
+          type="text" 
+          placeholder="সার্চ করুন..." 
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          onKeyDown={(e) => { if (e.key === 'Enter' && searchQuery) setPage('search'); }}
+          className="bg-slate-900 px-3 py-1.5 rounded-lg text-xs border border-slate-700 text-white focus:outline-none"
+        />
       </header>
 
-      {/* Main Content Area */}
-      <main style={{ padding: '16px' }}>
+      {/* Main Area */}
+      <main className="p-4">
         {page === 'home' && (
           <div>
-            <h2>স্বাগতম প্রবাসী ভাইদের</h2>
-            <p>ইরাকে থাকা বাংলাদেশিদের সকল প্রকার সহায়তা ও তথ্য পেতে নিচের সেবাগুলো ব্যবহার করুন।</p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px', marginTop: '20px' }}>
-              {serviceItems.map((item, idx) => (
-                <div key={idx} onClick={() => setPage(item.page)} style={{ background: '#fff', padding: '16px', borderRadius: '8px', cursor: 'pointer', textAlign: 'center', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
-                  <item.icon size={28} className={item.color} />
-                  <h4 style={{ margin: '8px 0 4px 0' }}>{item.label}</h4>
-                  <small style={{ color: '#666' }}>{item.sub}</small>
-                </div>
-              ))}
+            <div className="bg-gradient-to-r from-teal-800 to-slate-800 p-4 rounded-2xl mb-4 border border-slate-700">
+              <h2 className="text-lg font-bold mb-1">স্বাগতম, মুসফাক রাশেদ</h2>
+              <p className="text-xs text-slate-300">Baghdad, Iraq</p>
+              <div className="mt-3 p-3 bg-white/10 rounded-xl backdrop-blur-md text-xs">
+                প্রবাসীর সেবা আমাদের অঙ্গীকার, আমরা আছি আপনার পাশে।
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-3">
+              <div onClick={() => setPage('jobs')} className="bg-slate-800 p-4 rounded-xl text-center cursor-pointer border border-slate-700/50 hover:bg-slate-700">
+                <BriefcaseBusiness className="w-6 h-6 text-blue-400 mx-auto mb-2" />
+                <span className="text-xs font-medium">চাকরি (Jobs)</span>
+              </div>
+              <div onClick={() => setPage('notices')} className="bg-slate-800 p-4 rounded-xl text-center cursor-pointer border border-slate-700/50 hover:bg-slate-700">
+                <Bell className="w-6 h-6 text-amber-400 mx-auto mb-2" />
+                <span className="text-xs font-medium">নোটিশ (Notices)</span>
+              </div>
+              <div onClick={() => setPage('passport')} className="bg-slate-800 p-4 rounded-xl text-center cursor-pointer border border-slate-700/50 hover:bg-slate-700">
+                <FileCheck2 className="w-6 h-6 text-emerald-400 mx-auto mb-2" />
+                <span className="text-xs font-medium">পাসপোর্ট স্ট্যাটাস</span>
+              </div>
+              <div onClick={() => setPage('track')} className="bg-slate-800 p-4 rounded-xl text-center cursor-pointer border border-slate-700/50 hover:bg-slate-700">
+                <FileText className="w-6 h-6 text-indigo-400 mx-auto mb-2" />
+                <span className="text-xs font-medium">আবেদন ট্র্যাকিং</span>
+              </div>
+              <div onClick={() => setPage('chat')} className="bg-slate-800 p-4 rounded-xl text-center cursor-pointer border border-slate-700/50 hover:bg-slate-700">
+                <Users className="w-6 h-6 text-purple-400 mx-auto mb-2" />
+                <span className="text-xs font-medium">চ্যাট সাপোর্ট</span>
+              </div>
+              <div onClick={() => setPage('profile')} className="bg-slate-800 p-4 rounded-xl text-center cursor-pointer border border-slate-700/50 hover:bg-slate-700">
+                <User className="w-6 h-6 text-teal-400 mx-auto mb-2" />
+                <span className="text-xs font-medium">প্রোফাইল</span>
+              </div>
             </div>
           </div>
         )}
 
         {page === 'social' && (
           <div>
-            <h2>সোশ্যাল কমিউনিটি</h2>
+            <h2 className="text-lg font-bold mb-3">সোশ্যাল কমিউনিটি</h2>
             {initialPosts.map(p => (
-              <div key={p.id} style={{ background: '#fff', padding: '12px', margin: '10px 0', borderRadius: '8px' }}>
-                <strong>{p.author_name}</strong> <small style={{ color: '#888' }}>({p.author_role})</small>
-                <p>{p.content}</p>
-                <small style={{ color: '#aaa' }}>{p.time}</small>
+              <div key={p.id} className="bg-slate-800 p-4 rounded-xl mb-3 border border-slate-700">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-8 h-8 rounded-full bg-emerald-600 flex items-center justify-center font-bold text-xs">{p.author_name[0]}</div>
+                  <div>
+                    <h4 className="text-sm font-bold">{p.author_name}</h4>
+                    <span className="text-[10px] text-slate-400">{p.time}</span>
+                  </div>
+                </div>
+                <p className="text-sm text-slate-200 mb-2">{p.content}</p>
               </div>
             ))}
           </div>
@@ -168,13 +218,13 @@ export default function App() {
 
         {page === 'jobs' && (
           <div>
-            <h2>ইরাকের চাকরির সুযোগ</h2>
+            <h2 className="text-lg font-bold mb-3">চাকরির সুযোগ</h2>
             {jobs.map((job, idx) => (
-              <div key={idx} style={{ background: '#fff', padding: '14px', margin: '10px 0', borderRadius: '8px', borderLeft: '4px solid #0d9488' }}>
-                <h3 style={{ margin: '0 0 6px 0' }}>{job.title}</h3>
-                <p style={{ margin: '0 0 6px 0', color: '#444' }}>{job.company} - {job.location}</p>
-                <p style={{ margin: '0 0 8px 0', fontSize: '14px' }}>{job.description}</p>
-                <strong>বেতন: {job.salary}</strong>
+              <div key={idx} className="bg-slate-800 p-4 rounded-xl mb-3 border-l-4 border-emerald-500 border border-slate-700">
+                <h3 className="font-bold text-base text-white">{job.title}</h3>
+                <p className="text-xs text-slate-300 mb-1">{job.company} - {job.location}</p>
+                <p className="text-xs text-slate-400 mb-2">{job.description}</p>
+                <span className="text-xs font-semibold text-emerald-400">বেতন: {job.salary}</span>
               </div>
             ))}
           </div>
@@ -182,32 +232,75 @@ export default function App() {
 
         {page === 'notices' && (
           <div>
-            <h2>জরুরি নোটিশ ও ঘোষণা</h2>
+            <h2 className="text-lg font-bold mb-3">জরুরি নোটিশ ও ঘোষণা</h2>
             {notices.map((n, idx) => (
-              <div key={idx} style={{ background: '#fff', padding: '14px', margin: '10px 0', borderRadius: '8px' }}>
-                <span style={{ background: '#fef3c7', color: '#d97706', padding: '2px 8px', borderRadius: '4px', fontSize: '12px' }}>{n.tag}</span>
-                <h3 style={{ margin: '6px 0' }}>{n.title}</h3>
-                <small style={{ color: '#666' }}>তারিখ: {n.date}</small>
+              <div key={idx} className="bg-slate-800 p-4 rounded-xl mb-3 border border-slate-700">
+                <span className="bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded text-[10px] font-semibold">{n.tag}</span>
+                <h3 className="font-bold text-sm mt-1 text-white">{n.title}</h3>
+                <span className="text-[10px] text-slate-400">তারিখ: {n.date}</span>
               </div>
             ))}
           </div>
         )}
 
-        {page === 'passport' && <PassportPage />}
+        {page === 'passport' && (
+          <div className="bg-slate-800 p-5 rounded-xl border border-slate-700">
+            <h2 className="text-lg font-bold mb-2">পাসপোর্ট ট্র্যাকিং</h2>
+            <p className="text-xs text-slate-300 mb-4">আপনার পাসপোর্ট নম্বর লিখে স্ট্যাটাস চেক করুন।</p>
+            <input type="text" placeholder="পাসপোর্ট নম্বর দিন..." className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm text-white mb-3" />
+            <button className="w-full bg-emerald-600 py-2.5 rounded-lg text-sm font-bold">স্ট্যাটাস চেক করুন</button>
+          </div>
+        )}
+
+        {page === 'track' && (
+          <div className="bg-slate-800 p-5 rounded-xl border border-slate-700">
+            <h2 className="text-lg font-bold mb-2">আবেদন ট্র্যাকিং</h2>
+            <div className="space-y-3 mt-4">
+              <div className="p-3 bg-slate-900 rounded-lg border border-slate-700 flex justify-between items-center">
+                <div>
+                  <h4 className="text-sm font-bold">পাসপোর্ট নবায়ন</h4>
+                  <span className="text-xs text-slate-400">TRK-2024-001</span>
+                </div>
+                <span className="text-xs text-amber-400 bg-amber-400/10 px-2 py-1 rounded">প্রক্রিয়াধীন</span>
+              </div>
+              <div className="p-3 bg-slate-900 rounded-lg border border-slate-700 flex justify-between items-center">
+                <div>
+                  <h4 className="text-sm font-bold">কোম্পানি পরিবর্তন</h4>
+                  <span className="text-xs text-slate-400">TRK-2024-002</span>
+                </div>
+                <span className="text-xs text-emerald-400 bg-emerald-400/10 px-2 py-1 rounded">সম্পন্ন</span>
+              </div>
+            </div>
+          </div>
+        )}
+
         {page === 'profile' && <ProfilePage />}
-        {page === 'search' && <SearchResults query={searchQuery} />}
+        {page === 'chat' && <ChatPage />}
+        
+        {page === 'search' && (
+          <div>
+            <h2 className="text-lg font-bold mb-3">সার্চ ফলাফল: "{searchQuery}"</h2>
+            <p className="text-xs text-slate-400">আপনার অনুসন্ধানের সাথে মিলFound ফলাফল নিচে দেখানো হলো।</p>
+          </div>
+        )}
       </main>
 
-      {/* Bottom Navigation */}
-      <nav style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: '#fff', display: 'flex', justifyContent: 'space-around', borderTop: '1px solid #ddd', padding: '10px 0' }}>
+      {/* Bottom Navigation Bar */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-slate-800 border-t border-slate-700 flex justify-around items-center py-2 px-4 shadow-lg z-50">
         {navItems.map((item, idx) => (
           <button 
             key={idx} 
             onClick={() => setPage(item.page)}
-            style={{ background: 'none', border: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', color: page === item.page ? '#0d9488' : '#666' }}
+            className={`flex flex-col items-center justify-center transition-all ${item.isCenter ? '-mt-5' : ''}`}
           >
-            <item.icon size={22} />
-            <span style={{ fontSize: '12px', marginTop: '2px' }}>{item.label}</span>
+            {item.isCenter ? (
+              <div className="w-12 h-12 bg-emerald-600 rounded-full flex items-center justify-center shadow-lg border-4 border-slate-900 text-white">
+                <item.icon size={22} />
+              </div>
+            ) : (
+              <item.icon size={20} className={page === item.page ? 'text-emerald-400' : 'text-slate-400'} />
+            )}
+            <span className={`text-[10px] mt-1 ${page === item.page ? 'text-emerald-400 font-bold' : 'text-slate-400'}`}>{item.label}</span>
           </button>
         ))}
       </nav>
