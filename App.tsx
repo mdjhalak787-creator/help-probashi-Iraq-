@@ -7,7 +7,7 @@ import {
   SlidersHorizontal, Sparkles, ThumbsUp, TrendingUp, User, UserRound, Users, X,
   type LucideIcon, UserCheck, UserX
 } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { supabase } from './lib/supabase';
 import './App.css';
 
 type Page = 'home' | 'social' | 'jobs' | 'notices' | 'passport' | 'track' | 'chat' | 'profile' | 'agent' | 'admin' | 'super';
@@ -513,7 +513,6 @@ function AdminPanel({ setPage }: { setPage: (p: Page) => void }) {
     if (!error && data) {
       setUsers(data as UserProfile[]);
     } else {
-      // ডেমো ডাটা যদি ডাটাবেজ টেবিল না থাকে
       setUsers([
         { id: '1', full_name: 'রফিকুল ইসলাম', email: 'rafiq@gmail.com', role: 'user', status: 'pending', created_at: '2026-03-01' },
         { id: '2', full_name: 'কামাল হোসেন', email: 'kamal@gmail.com', role: 'agent', status: 'approved', created_at: '2026-02-15' }
