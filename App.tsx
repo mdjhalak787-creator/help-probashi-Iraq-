@@ -1,12 +1,17 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { 
   Bell, BriefcaseBusiness, FileCheck2, 
   Home as HomeIcon, Search, Users, User, 
-  ArrowLeft, MapPin, Phone, Mail, ChevronRight, Settings, LogOut, FileText, Send, Smile
+  ArrowLeft, MapPin, Phone, Mail, ChevronRight, Settings, LogOut, FileText, Send, Smile, Globe, Shield, UserCheck
 } from 'lucide-react';
 import './App.css';
 
-type Page = 'home' | 'social' | 'jobs' | 'notices' | 'passport' | 'search' | 'profile' | 'track' | 'chat';
+// নতুন ড্যাশবোর্ড কম্পোনেন্টগুলো ইম্পোর্ট বা যুক্ত করা হলো
+import AgentDashboard from './AgentDashboard';
+import AdminDashboard from './AdminDashboard';
+import SuperAdminDashboard from './SuperAdminDashboard';
+
+type Page = 'home' | 'social' | 'jobs' | 'notices' | 'passport' | 'search' | 'profile' | 'track' | 'chat' | 'agent-dash' | 'admin-dash' | 'super-dash';
 
 type Post = { id: string; author_name: string; author_role: string; content: string; time: string; likes_count: number; comments_count: number };
 type Job = { company: string; title: string; location: string; salary: string; description: string };
@@ -34,7 +39,7 @@ const navItems = [
   { page: 'home' as Page, label: 'হোম', icon: HomeIcon },
   { page: 'social' as Page, label: 'সোশ্যাল', icon: Users },
   { page: 'jobs' as Page, label: 'সেবা', icon: BriefcaseBusiness, isCenter: true },
-  { page: 'chat' as Page, label: 'চ্যাট', icon: Search }, // চ্যাট বা সাপোর্ট
+  { page: 'chat' as Page, label: 'চ্যাট', icon: Search },
   { page: 'profile' as Page, label: 'প্রোফাইল', icon: User }
 ];
 
@@ -146,7 +151,14 @@ export default function App() {
     <div className="app-container min-h-screen bg-slate-900 text-white pb-20">
       {/* Header */}
       <header className="bg-slate-800 text-white px-4 py-3 flex justify-between items-center border-b border-slate-700">
-        <h1 className="text-base font-bold">প্রবাসী হেল্প কেয়ার ইরাক</h1>
+        <div className="flex items-center gap-2">
+          {page !== 'home' && (
+            <button onClick={() => setPage('home')} className="p-1 hover:bg-slate-700 rounded-full">
+              <ArrowLeft className="w-5 h-5 text-slate-300" />
+            </button>
+          )}
+          <h1 className="text-base font-bold">প্রবাসী হেল্প কেয়ার ইরাক</h1>
+        </div>
         <input 
           type="text" 
           placeholder="সার্চ করুন..." 
@@ -167,6 +179,22 @@ export default function App() {
               <div className="mt-3 p-3 bg-white/10 rounded-xl backdrop-blur-md text-xs">
                 প্রবাসীর সেবা আমাদের অঙ্গীকার, আমরা আছি আপনার পাশে।
               </div>
+            </div>
+
+            {/* Admin & Agent Dashboard Quick Links */}
+            <div className="grid grid-cols-3 gap-2 mb-4">
+              <button onClick={() => setPage('agent-dash')} className="p-2.5 bg-blue-600/20 border border-blue-500/30 rounded-xl text-center hover:bg-blue-600/30 transition">
+                <Users className="w-5 h-5 text-blue-400 mx-auto mb-1" />
+                <span className="text-[11px] font-medium text-blue-300">এজেন্ট ড্যাশবোর্ড</span>
+              </button>
+              <button onClick={() => setPage('admin-dash')} className="p-2.5 bg-emerald-600/20 border border-emerald-500/30 rounded-xl text-center hover:bg-emerald-600/30 transition">
+                <UserCheck className="w-5 h-5 text-emerald-400 mx-auto mb-1" />
+                <span className="text-[11px] font-medium text-emerald-300">অ্যাডমিন প্যানেল</span>
+              </button>
+              <button onClick={() => setPage('super-dash')} className="p-2.5 bg-amber-600/20 border border-amber-500/30 rounded-xl text-center hover:bg-amber-600/30 transition">
+                <Shield className="w-5 h-5 text-amber-400 mx-auto mb-1" />
+                <span className="text-[11px] font-medium text-amber-300">সুপার অ্যাডমিন</span>
+              </button>
             </div>
 
             <div className="grid grid-cols-3 gap-3">
@@ -276,6 +304,11 @@ export default function App() {
 
         {page === 'profile' && <ProfilePage />}
         {page === 'chat' && <ChatPage />}
+
+        {/* নতুন ড্যাশবোর্ড পেজগুলো */}
+        {page === 'agent-dash' && <AgentDashboard />}
+        {page === 'admin-dash' && <AdminDashboard />}
+        {page === 'super-dash' && <SuperAdminDashboard />}
         
         {page === 'search' && (
           <div>
