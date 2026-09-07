@@ -1,4 +1,4 @@
-Name: Build and Test Iraq Probashi Help
+name: Build and Test Iraq Probashi Help
 
 on:
   push:
