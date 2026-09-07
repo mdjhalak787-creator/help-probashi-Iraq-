@@ -19,11 +19,10 @@ jobs:
       with:
         node-version: 20.x
 
-    - name: Clean npm cache
-      run: npm cache clean --force
-
-    - name: Install dependencies
-      run: npm install --legacy-peer-deps
+    - name: Remove lock file and install fresh
+      run: |
+        rm -f package-lock.json
+        npm install --legacy-peer-deps
 
     - name: Run build check
       run: npm run build
