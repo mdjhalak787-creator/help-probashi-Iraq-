@@ -33,7 +33,7 @@ const notices = [
 ];
 
 const initialPosts: Post[] = [
-  { id: 'seed-1', author_name: 'Rashid Alom', author_role: 'সদস্য', content: 'আজ বাগদাদে বৃষ্টি হচ্ছে, সবাই নিরাপদে থাকবেন। নতুন যারা এসেছেন তাদের কোনো সাহায্য লাগলে জানাবেন।', image_url: 'https://images.pexels.com/photos/1118873/pexels-photo-1118873.jpeg?auto=compress&tinysrgb&w=1000', likes: 128, created_at: new Date(Date.now() - 3600000).toISOString() },
+  { id: 'seed-1', author_name: 'Rashid Alom', author_role: 'সদস্য', content: 'আজ বাগদাদে বৃষ্টি হচ্ছে, সবাই নিরাপদে থাকবেন। নতুন যারা এসেছেন তাদের কোনো সাহায্য লাগলে জানাবেন।', image_url: 'https://images.pexels.com/photos/1118873/pexels-photo-1118873.jpeg?auto=compress&cs=tinysrgb&w=1000', likes: 128, created_at: new Date(Date.now() - 3600000).toISOString() },
   { id: 'seed-2', author_name: 'Sujon Ahmed', author_role: 'সদস্য', content: 'নতুন কাজের সুযোগ সম্পর্কে জানতে চাকরি বিভাগটি দেখে নিন। সবার জন্য শুভকামনা।', likes: 42, created_at: new Date(Date.now() - 86400000).toISOString() },
 ];
 
@@ -95,7 +95,7 @@ export default function App() {
   const createPost = async (content: string) => {
     const optimistic: Post = { 
       id: `local-${Date.now()}`, 
-      author_name: 'মুস্তাফা বাংলাদেশ', 
+      author_name: 'Md Zalak Mia', 
       author_role: 'সদস্য', 
       content, 
       likes: 0, 
@@ -143,7 +143,7 @@ export default function App() {
   };
 
   const sendMessage = async (content: string) => {
-    const message = { sender_name: 'মুস্তাফা বাংলাদেশ', sender_role: 'user', content };
+    const message = { sender_name: 'Md Zalak Mia', sender_role: 'user', content };
     const { data } = await supabase.from('chat_messages').insert(message).select().maybeSingle();
     
     if (data) {
@@ -242,10 +242,10 @@ function Home({ setPage }: { setPage: (page: Page) => void }) {
       <div className="welcome">
         <div>
           <span className="eyebrow">বাগদাদ, ইরাক</span>
-          <h1>স্বাগতম, মুস্তাফা</h1>
+          <h1>স্বাগতম, Md Zalak Mia</h1>
           <p>আপনার প্রবাস জীবনকে সহজ করতে আমরা পাশে আছি।</p>
         </div>
-        <div className="avatar">মু</div>
+        <div className="avatar">ZM</div>
       </div>
       <div className="hero-card">
         <div>
@@ -290,7 +290,6 @@ function Home({ setPage }: { setPage: (page: Page) => void }) {
 function Social({ posts, createPost, likePost, notify }: { posts: Post[]; createPost: (content: string) => Promise<void>; likePost: (post: Post) => Promise<void>; notify: (message: string) => void }) { 
   const [content, setContent] = useState(''); 
   const [commentId, setCommentId] = useState<string | null>(null); 
-  const [comment, setComment] = useState(''); 
 
   const submit = async (event: FormEvent) => { 
     event.preventDefault(); 
@@ -302,21 +301,12 @@ function Social({ posts, createPost, likePost, notify }: { posts: Post[]; create
 
   return (
     <>
-      <PageHeader title="সোশ্যাল" subtitle="কমিউনিটির সাথে যুক্ত থাকুন" />
-      <div className="story-row">
-        <div className="story-add">
-          <span><Plus size={18} /></span>
-          <small>আপনার স্টোরি</small>
-        </div>
-        {['Hasan', 'Rashid', 'Alamin', 'Sujon'].map((name, index) => (
-          <div className="story" key={name}>
-            <div className={`story-avatar story-${index}`}>{name.slice(0, 1)}</div>
-            <small>{name}</small>
-          </div>
-        ))}
+      <div className="page-header">
+        <h2>সোশ্যাল ফিড</h2>
+        <p>কমিউনিটির সাথে যুক্ত থাকুন</p>
       </div>
       <form className="composer" onSubmit={submit}>
-        <div className="avatar small">মু</div>
+        <div className="avatar small">ZM</div>
         <input value={content} onChange={(event) => setContent(event.target.value)} placeholder="আপনি কী ভাবছেন?" />
         <button type="submit"><Send size={17} /></button>
       </form>
@@ -326,7 +316,7 @@ function Social({ posts, createPost, likePost, notify }: { posts: Post[]; create
             <div className="avatar small">{post.author_name.slice(0, 1)}</div>
             <div>
               <strong>{post.author_name}</strong>
-              <small>{post.author_role} · {timeAgo(post.created_at)}</small>
+              <small>{post.author_role} · {post.created_at.slice(0, 10)}</small>
             </div>
             <MoreHorizontal size={19} />
           </div>
@@ -334,354 +324,194 @@ function Social({ posts, createPost, likePost, notify }: { posts: Post[]; create
           {post.image_url && <img className="post-image" src={post.image_url} alt="কমিউনিটি পোস্ট" />}
           <div className="post-stats">
             <span><span className="reaction-dot">♥</span> {post.likes}</span>
-            <span>২টি মন্তব্য</span>
           </div>
           <div className="post-actions">
             <button onClick={() => void likePost(post)}><ThumbsUp size={17} /> লাইক</button>
             <button onClick={() => setCommentId(commentId === post.id ? null : post.id)}><MessageCircle size={17} /> কমেন্ট</button>
             <button onClick={() => notify('পোস্টের লিংক কপি হয়েছে')}><ArrowRight size={17} /> শেয়ার</button>
           </div>
-          {commentId === post.id && (
-            <form className="comment-form" onSubmit={(event) => { event.preventDefault(); setComment(''); notify('মন্তব্য যোগ হয়েছে'); }}>
-              <input value={comment} onChange={(event) => setComment(event.target.value)} placeholder="মন্তব্য লিখুন..." />
-              <button type="submit"><Send size={16} /></button>
-            </form>
-          )}
         </article>
       ))}
     </>
   ); 
 }
 
-function PageHeader({ title, subtitle, back = false }: { title: string; subtitle?: string; back?: boolean }) { 
-  return (
-    <div className="page-header">
-      {back && <button className="back-button"><ArrowLeft size={20} /></button>}
-      <div>
-        <h1>{title}</h1>
-        {subtitle && <p>{subtitle}</p>}
-      </div>
-      <button className="icon-button header-action"><Search size={19} /></button>
-    </div>
-  ); 
-}
-
-function Jobs({ search, setSearch, openJob }: { search: string; setSearch: (value: string) => void; openJob: (job: Job) => void }) { 
-  const filtered = jobs.filter((job) => `${job.title} ${job.company} ${job.location}`.toLowerCase().includes(search.toLowerCase())); 
+function Jobs({ search, setSearch, openJob }: { search: string; setSearch: (s: string) => void; openJob: (j: Job) => void }) {
+  const filtered = jobs.filter((j) => j.title.toLowerCase().includes(search.toLowerCase()) || j.location.toLowerCase().includes(search.toLowerCase()));
   return (
     <>
-      <PageHeader title="চাকরির সুযোগ" subtitle="ইরাকে নতুন সুযোগ খুঁজুন" />
+      <div className="page-header">
+        <h2>চাকরির সুযোগ</h2>
+        <p>ইরাকে আপনার পছন্দের কাজ খুঁজুন</p>
+      </div>
       <div className="search-box">
         <Search size={18} />
-        <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="চাকরি, কোম্পানি বা শহর খুঁজুন" />
-        <SlidersHorizontal size={18} />
-      </div>
-      <div className="filter-row">
-        <button className="active">সব</button>
-        <button>জনপ্রিয়</button>
-        <button>নতুন</button>
-        <button>বেতন বেশি</button>
+        <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="পদ বা স্থান দিয়ে খুঁজুন..." />
       </div>
       <div className="job-list">
-        {filtered.map((job) => (
-          <button className="job-card" key={job.title} onClick={() => openJob(job)}>
-            <span className={`job-icon ${job.color}`}><job.icon size={23} /></span>
-            <span className="job-info">
-              <strong>{job.title}</strong>
-              <small>{job.company}</small>
-              <small><MapPin size={12} /> {job.location}</small>
-              <b>{job.salary}</b>
-            </span>
-            <span className="job-side"><BookmarkIcon /><small>{job.type}</small></span>
-          </button>
+        {filtered.map((job, idx) => (
+          <div className="job-card" key={idx} onClick={() => openJob(job)}>
+            <div className={`job-icon ${job.color}`}><job.icon size={22} /></div>
+            <div className="job-info">
+              <h3>{job.title}</h3>
+              <p>{job.company} • {job.location}</p>
+              <span className="salary">{job.salary}</span>
+            </div>
+            <ChevronRight size={18} />
+          </div>
         ))}
       </div>
     </>
-  ); 
+  );
 }
 
-function BookmarkIcon() { return <FileCheck2 size={18} />; }
-
-function JobModal({ job, close, apply }: { job: Job; close: () => void; apply: (job: Job) => Promise<void> }) { 
+function JobModal({ job, close, apply }: { job: Job; close: () => void; apply: (j: Job) => void }) {
   return (
-    <div className="modal-backdrop" onClick={close}>
-      <div className="modal-sheet" onClick={(event) => event.stopPropagation()}>
-        <button className="modal-close" onClick={close}><X size={20} /></button>
-        <span className={`job-icon ${job.color} large`}><job.icon size={28} /></span>
-        <span className="eyebrow">{job.company}</span>
-        <h2>{job.title}</h2>
-        <div className="detail-meta">
-          <span><MapPin size={14} />{job.location}</span>
-          <span><Clock3 size={14} />{job.type}</span>
-        </div>
-        <div className="salary-highlight">{job.salary}<small>মাসিক বেতন</small></div>
-        <p>{job.description}</p>
-        <button className="primary-button" onClick={() => void apply(job)}>এখনই আবেদন করুন <ArrowRight size={17} /></button>
+    <div className="modal-backdrop">
+      <div className="modal-card">
+        <button className="close-btn" onClick={close}><X size={20} /></button>
+        <h3>{job.title}</h3>
+        <p className="company-name">{job.company}</p>
+        <p className="location"><MapPin size={14} /> {job.location}</p>
+        <p className="salary-tag">{job.salary}</p>
+        <p className="desc">{job.description}</p>
+        <button className="apply-btn" onClick={() => apply(job)}>আবেদন করুন</button>
       </div>
     </div>
-  ); 
+  );
 }
 
-function Notices() { 
-  const [filter, setFilter] = useState('সব'); 
-  const shown = filter === 'সব' ? notices : notices.filter((item) => item.tag === filter); 
+function Notices() {
   return (
     <>
-      <PageHeader title="নোটিশ / বিজ্ঞপ্তি" subtitle="গুরুত্বপূর্ণ তথ্য ও আপডেট" />
-      <div className="filter-row notice-filters">
-        {['সব', 'জরুরি', 'সরকারি', 'সাধারণ'].map((item) => (
-          <button className={filter === item ? 'active' : ''} key={item} onClick={() => setFilter(item)}>{item}</button>
-        ))}
+      <div className="page-header">
+        <h2>নোটিশ বোর্ড</h2>
+        <p>গুরুত্বপূর্ণ সরকারি ও সাধারণ বিজ্ঞপ্তি</p>
       </div>
       <div className="notice-list">
-        {shown.map((notice) => (
-          <button className="notice-card" key={notice.title}>
-            <span className={`notice-icon ${notice.color}`}><notice.icon size={21} /></span>
-            <span>
-              <strong>{notice.title}</strong>
-              <small>{notice.date} · <em>{notice.tag}</em></small>
-            </span>
-            <ChevronRight size={18} />
-          </button>
-        ))}
-      </div>
-    </>
-  ); 
-}
-
-function Passport() { 
-  const steps = ['আবেদন জমা', 'ডকুমেন্ট যাচাই', 'প্রসেসিং', 'প্রস্তুত']; 
-  return (
-    <>
-      <PageHeader title="পাসপোর্ট স্ট্যাটাস" subtitle="আপনার পাসপোর্টের অগ্রগতি" back />
-      <div className="passport-card">
-        <div className="passport-top">
-          <div>
-            <span className="eyebrow">পাসপোর্ট নম্বর</span>
-            <h2>A12345678</h2>
-            <p>মুস্তাফা বাংলাদেশ</p>
-          </div>
-          <FileCheck2 size={22} />
-        </div>
-        <div className="passport-meta">
-          <span><small>জন্ম তারিখ</small><b>12 Jan 1993</b></span>
-          <span><small>মেয়াদ শেষ</small><b>11 Jan 2028</b></span>
-        </div>
-      </div>
-      <div className="progress-card">
-        <div className="section-title">
-          <h2>বর্তমান অবস্থা</h2>
-          <span className="pill success">প্রসেসিং</span>
-        </div>
-        <div className="steps">
-          {steps.map((step, index) => (
-            <div className="step" key={step}>
-              <span className={index < 3 ? 'done' : ''}>{index < 3 ? <Check size={14} /> : index + 1}</span>
-              <small>{step}</small>
-            </div>
-          ))}
-        </div>
-        <div className="timeline">
-          <p><strong>ডকুমেন্ট যাচাই সম্পন্ন</strong><span>২৪ এপ্রিল, ২০২৪</span></p>
-          <p><strong>প্রসেসিং শুরু হয়েছে</strong><span>২৬ এপ্রিল, ২০২৪</span></p>
-        </div>
-        <div className="info-note"><Info size={17} /> আপনার পাসপোর্ট প্রস্তুত হলে আপনাকে এসএমএসের মাধ্যমে জানানো হবে।</div>
-      </div>
-      <button className="primary-button">বিস্তারিত দেখুন <ArrowRight size={17} /></button>
-    </>
-  ); 
-}
-
-function Track({ applications, search, setSearch }: { applications: Application[]; search: string; setSearch: (value: string) => void }) { 
-  const records = applications.length ? applications : [{ id: 'demo', tracking_code: 'IRQ-2024-001', title: 'পাসপোর্ট নবায়ন', category: 'পাসপোর্ট', status: 'প্রসেসিং', submitted_at: '2024-04-20' }]; 
-  const filtered = records.filter((item) => `${item.tracking_code} ${item.title}`.toLowerCase().includes(search.toLowerCase())); 
-  return (
-    <>
-      <PageHeader title="আবেদন ট্র্যাকিং" subtitle="আপনার সব আবেদনের অবস্থা" back />
-      <div className="track-search">
-        <Search size={18} />
-        <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="ট্র্যাকিং কোড লিখুন" />
-        <button>খুঁজুন</button>
-      </div>
-      <div className="track-list">
-        {filtered.map((item) => (
-          <div className="track-card" key={item.id}>
-            <div className="track-icon"><FileText size={20} /></div>
+        {notices.map((n, idx) => (
+          <div className="notice-item" key={idx}>
+            <span className={`notice-badge ${n.color}`}><n.icon size={18} /></span>
             <div>
-              <strong>{item.title}</strong>
-              <small>{item.tracking_code}</small>
-              <small>তারিখ: {item.submitted_at}</small>
+              <strong>{n.title}</strong>
+              <small>{n.date} · {n.tag}</small>
             </div>
-            <span className={`pill ${item.status === 'জমা হয়েছে' ? 'orange' : 'success'}`}>{item.status}</span>
           </div>
         ))}
       </div>
-      <button className="outline-button"><Plus size={18} /> নতুন আবেদন শুরু করুন</button>
     </>
-  ); 
+  );
 }
 
-function Chat({ messages, sendMessage }: { messages: ChatMessage[]; sendMessage: (content: string) => Promise<void> }) { 
-  const [input, setInput] = useState(''); 
-  const submit = async (event: FormEvent) => { 
-    event.preventDefault(); 
-    if (!input.trim()) return; 
-    await sendMessage(input.trim()); 
-    setInput(''); 
-  }; 
+function Passport() {
+  return (
+    <div className="page-header">
+      <h2>পাসপোর্ট স্ট্যাটাস</h2>
+      <p>আপনার পাসপোর্টের বর্তমান অবস্থা জানুন</p>
+      <div className="status-box">
+        <h3>ট্র্যাকিং কোড: IRQ-2024-001</h3>
+        <p className="status-text">স্ট্যাটাস: <strong>প্রস্তুত আছে</strong></p>
+        <small>ইরাক বাংলাদেশ দূতাবাস থেকে সংগ্রহ করতে পারেন।</small>
+      </div>
+    </div>
+  );
+}
+
+function Track({ applications, search, setSearch }: { applications: Application[]; search: string; setSearch: (s: string) => void }) {
+  const filtered = applications.filter((a) => a.tracking_code.toLowerCase().includes(search.toLowerCase()) || a.title.toLowerCase().includes(search.toLowerCase()));
   return (
     <>
-      <PageHeader title="চ্যাট সাপোর্ট" subtitle="অফিসিয়াল এজেন্টের সাথে কথা বলুন" back />
-      <div className="agent-bar">
-        <div className="agent-avatar">রআ</div>
-        <div>
-          <strong>রহমান আলী</strong>
-          <small><i className="online-dot" /> এখন অনলাইনে · সাধারণত ৫ মিনিটে উত্তর দেন</small>
-        </div>
-        <PhoneIcon />
+      <div className="page-header">
+        <h2>আবেদন ট্র্যাকিং</h2>
+        <p>আপনার জমাকৃত আবেদনগুলোর বর্তমান অবস্থা</p>
       </div>
-      <div className="chat-window">
-        <div className="date-divider">আজ, ০৬ মে</div>
-        {messages.length === 0 && (
-          <div className="empty-chat">
-            <MessageCircle size={28} />
-            <p>আপনার প্রশ্ন লিখে শুরু করুন।</p>
-          </div>
-        )}
-        {messages.map((message) => (
-          <div className={`bubble-row ${message.sender_role === 'user' ? 'mine' : ''}`} key={message.id}>
-            <div className="bubble">
-              <p>{message.content}</p>
-              <small>{new Date(message.created_at).toLocaleTimeString('bn-BD', { hour: '2-digit', minute: '2-digit' })}</small>
+      <div className="search-box">
+        <Search size={18} />
+        <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="ট্র্যাকিং কোড দিয়ে খুঁজুন..." />
+      </div>
+      <div className="app-list">
+        {filtered.map((app) => (
+          <div className="app-item" key={app.id}>
+            <div>
+              <strong>{app.title}</strong>
+              <small>কোড: {app.tracking_code} • তারিখ: {app.submitted_at}</small>
             </div>
+            <span className="badge">{app.status}</span>
           </div>
         ))}
       </div>
-      <form className="chat-input" onSubmit={submit}>
-        <button type="button"><Plus size={19} /></button>
-        <input value={input} onChange={(event) => setInput(event.target.value)} placeholder="মেসেজ লিখুন..." />
-        <button className="send-button" type="submit"><Send size={18} /></button>
+    </>
+  );
+}
+
+function Chat({ messages, sendMessage }: { messages: ChatMessage[]; sendMessage: (c: string) => Promise<void> }) {
+  const [text, setText] = useState('');
+  const submit = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!text.trim()) return;
+    await sendMessage(text.trim());
+    setText('');
+  };
+  return (
+    <div className="chat-container">
+      <div className="page-header">
+        <h2>চ্যাট সাপোর্ট</h2>
+        <p>অফিসিয়াল এজেন্টের সাথে কথা বলুন</p>
+      </div>
+      <div className="message-list">
+        {messages.map((m) => (
+          <div className={`message-bubble ${m.sender_role === 'user' ? 'user' : 'agent'}`} key={m.id}>
+            <small>{m.sender_name}</small>
+            <p>{m.content}</p>
+          </div>
+        ))}
+      </div>
+      <form className="chat-input-box" onSubmit={submit}>
+        আপনার বার্তা লিখুন...
+        <input value={text} onChange={(e) => setText(e.target.value)} placeholder="এখানে লিখুন..." />
+        <button type="submit"><Send size={16} /></button>
       </form>
-    </>
-  ); 
+    </div>
+  );
 }
 
-function PhoneIcon() { return <CircleHelp size={21} />; }
-
-function Profile({ setPage, notify }: { setPage: (page: Page) => void; notify: (message: string) => void }) { 
-  const [editing, setEditing] = useState(false); 
+function Profile({ setPage, notify }: { setPage: (p: Page) => void; notify: (m: string) => void }) {
   return (
-    <>
-      <PageHeader title="আমার প্রোফাইল" subtitle="আপনার ব্যক্তিগত তথ্য" />
-      <div className="profile-head">
-        <div className="profile-avatar">মু<span className="camera"><Pencil size={13} /></span></div>
-        <h2>মুস্তাফা বাংলাদেশ</h2>
-        <p><MapPin size={14} /> বাগদাদ, ইরাক</p>
-        <button className="outline-button compact" onClick={() => setEditing(!editing)}><Pencil size={15} /> {editing ? 'সম্পন্ন' : 'প্রোফাইল এডিট'}</button>
+    <div className="profile-page">
+      <div className="profile-card">
+        <div className="avatar large">ZM</div>
+        <h2>Md Zalak Mia</h2>
+        <p>বাগদাদ, ইরাক</p>
       </div>
-      {editing && (
-        <div className="edit-form">
-          <input defaultValue="মুস্তাফা বাংলাদেশ" aria-label="নাম" />
-          <input defaultValue="+964 770 123 4567" aria-label="ফোন" />
-          <button className="primary-button" onClick={() => { setEditing(false); notify('প্রোফাইল আপডেট হয়েছে'); }}>তথ্য সংরক্ষণ</button>
-        </div>
-      )}
       <div className="profile-menu">
-        {[
-          ['ব্যক্তিগত তথ্য', User], 
-          ['আমার আবেদনসমূহ', ClipboardList], 
-          ['নোটিফিকেশন সেটিংস', Bell], 
-          ['ভাষা / Language', Globe2], 
-          ['সেটিংস', Settings]
-        ].map(([label, Icon]) => (
-          <button key={label as string} onClick={() => notify(`${label as string} বিভাগটি খোলা হয়েছে`)}>
-            <Icon size={19} />
-            <span>{label as string}</span>
-            <ChevronRight size={17} />
-          </button>
-        ))}
-        <button className="logout" onClick={() => notify('আপনি নিরাপде লগআউট করেছেন')}>
-          <LogOut size={19} />
-          <span>লগ আউট</span>
-          <ChevronRight size={17} />
-        </button>
+        <button onClick={() => setPage('track')}><ClipboardList size={18} /> আমার আবেদনসমূহ <ChevronRight size={16} /></button>
+        <button onClick={() => setPage('agent')}><Shield size={18} /> এজেন্ট ড্যাশবোর্ড <ChevronRight size={16} /></button>
+        <button onClick={() => setPage('admin')}><LayoutDashboard size={18} /> এডমিন প্যানেল <ChevronRight size={16} /></button>
+        <button onClick={() => notify('লগ আউট সফল হয়েছে')} className="logout"><LogOut size={18} /> লগ আউট</button>
       </div>
-      <SectionTitle title="রোল প্রিভিউ" />
-      <div className="role-grid">
-        <button onClick={() => setPage('agent')}><Users size={19} />এজেন্ট</button>
-        <button onClick={() => setPage('admin')}><Shield size={19} />অ্যাডমিন</button>
-        <button onClick={() => setPage('super')}><Settings size={19} />সুপার অ্যাডমিন</button>
-      </div>
-    </>
-  ); 
+    </div>
+  );
 }
 
-function Dashboard({ kind, setPage }: { kind: 'agent' | 'admin' | 'super'; setPage: (page: Page) => void }) { 
-  const config = { 
-    agent: { title: 'এজেন্ট ড্যাশবোর্ড', subtitle: 'আপনার ক্লায়েন্ট ও কাজের সারাংশ', name: 'মুস্তাফা বাংলাদেশ', stats: [['মোট ক্লায়েন্ট', '128'], ['চলমান আবেদন', '43'], ['সম্পন্ন', '85']], menus: ['নতুন আবেদন', 'ক্লায়েন্ট সমূহ', 'আবেদন ব্যবস্থাপনা', 'নোটিশ প্রকাশ'] }, 
-    admin: { title: 'অ্যাডমিন ড্যাশবোর্ড', subtitle: 'সিস্টেমের সামগ্রিক চিত্র', name: 'সিস্টেম অ্যাডমিন', stats: [['মোট ব্যবহারকারী', '12,548'], ['সক্রিয় এজেন্ট', '523'], ['মোট আবেদন', '8,965'], ['আজকের আবেদন', '2,145']], menus: ['ব্যবহারকারী ব্যবস্থাপনা', 'এজেন্ট ব্যবস্থাপনা', 'আবেদন ব্যবস্থাপনা', 'নোটিশ প্রকাশ'] }, 
-    super: { title: 'সুপার-অ্যাডমিন ড্যাশবোর্ড', subtitle: 'সিস্টেম সেটিংস ও নিয়ন্ত্রণ', name: 'সুপার অ্যাডমিন', stats: [['মোট ব্যবহারকারী', '25,689'], ['মোট এজেন্ট', '1,245'], ['মোট আবেদন', '18,745'], ['সক্রিয় সেশন', '9,832']], menus: ['সুপার অ্যাডমিন', 'রোল ম্যানেজমেন্ট', 'সিস্টেম সেটিংস', 'রিপোর্টস'] } 
-  }[kind]; 
-
+function Dashboard({ kind, setPage }: { kind: 'agent' | 'admin' | 'super'; setPage: (p: Page) => void }) {
   return (
-    <>
-      <PageHeader title={config.title} subtitle={config.subtitle} back />
-      <div className="dashboard-hero">
-        <div className="profile-avatar mini">{kind === 'agent' ? 'মু' : kind === 'admin' ? 'অ্যা' : 'সু'}</div>
-        <div>
-          <strong>{config.name}</strong>
-          <small>অ্যাক্সেস লেভেল: {kind === 'agent' ? 'AGT-2045' : kind === 'admin' ? 'ADM-001' : 'ROOT-001'}</small>
-        </div>
-        <Settings size={18} />
-      </div>
-      <div className={`stats-grid ${config.stats.length === 3 ? 'three' : ''}`}>
-        {config.stats.map(([label, value]) => (
-          <div className="stat-card" key={label}>
-            <strong>{value}</strong>
-            <small>{label}</small>
-            <TrendingUp size={15} />
-          </div>
-        ))}
-      </div>
-      <SectionTitle title="দ্রুত ব্যবস্থাপনা" />
-      <div className="manage-grid">
-        {config.menus.map((menu, index) => (
-          <button key={menu} onClick={() => setPage(index === 3 ? 'notices' : 'profile')}>
-            <span className={`manage-icon tone-${index}`}><LayoutDashboard size={18} /></span>
-            <span>{menu}</span>
-            <ChevronRight size={16} />
-          </button>
-        ))}
-      </div>
-      <div className="dashboard-note">
-        <Sparkles size={18} />
-        <div>
-          <strong>সব সিস্টেম স্বাভাবিক</strong>
-          <small>সর্বশেষ আপডেট: আজ, ০৯:৪১</small>
-        </div>
-      </div>
-    </>
-  ); 
+    <div className="dashboard-page">
+      <button className="back-btn" onClick={() => setPage('profile')}><ArrowLeft size={16} /> ফিরে যান</button>
+      <h2>{kind === 'agent' ? 'এজেন্ট ড্যাশবোর্ড' : kind === 'admin' ? 'এডমিন প্যানেল' : 'সুপার এডমিন'}</h2>
+      <p>ব্যবস্থাপনা ও নিয়ন্ত্রণ প্যানেল</p>
+    </div>
+  );
 }
 
-function BottomNav({ page, setPage }: { page: Page; setPage: (page: Page) => void }) { 
+function BottomNav({ page, setPage }: { page: Page; setPage: (p: Page) => void }) {
   return (
     <nav className="bottom-nav">
-      {navItems.map(({ page: itemPage, label, icon: Icon }) => (
-        <button key={itemPage} className={page === itemPage ? 'active' : ''} onClick={() => setPage(itemPage)}>
-          <Icon size={19} />
-          <span>{label}</span>
+      {navItems.map((item) => (
+        <button key={item.page} className={page === item.page ? 'active' : ''} onClick={() => setPage(item.page)}>
+          <item.icon size={20} />
+          <span>{item.label}</span>
         </button>
       ))}
-      <button className={['agent', 'admin', 'super'].includes(page) ? 'active' : ''} onClick={() => setPage('profile')}>
-        <Menu size={19} />
-        <span>মেনু</span>
-      </button>
     </nav>
-  ); 
-}
-
-function timeAgo(value: string) { 
-  const minutes = Math.max(1, Math.floor((Date.now() - new Date(value).getTime()) / 60000)); 
-  return minutes < 60 ? `${minutes}মি` : `${Math.floor(minutes / 60)}ঘ`; 
+  );
 }
